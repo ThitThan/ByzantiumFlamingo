@@ -1,0 +1,20 @@
+#BlueJ class context
+comment0.target=Flamingo
+comment0.text=\r\n\ Write\ a\ description\ of\ class\ Flamingo\ here.\r\n\ \r\n\ @author\ (your\ name)\ \r\n\ @version\ (a\ version\ number\ or\ a\ date)\r\n
+comment1.params=
+comment1.target=int\ getWalkingSpeed()
+comment2.params=speed
+comment2.target=void\ setWalkingSpeed(int)
+comment3.params=callback
+comment3.target=void\ setCallback(Flamingo.Callback)
+comment4.params=world
+comment4.target=void\ addedToWorld(greenfoot.World)
+comment5.params=
+comment5.target=void\ act()
+comment6.params=
+comment6.target=void\ jump()
+comment7.params=
+comment7.target=void\ applyJumping()
+comment8.params=frames
+comment8.target=void\ animateWalk(int)
+numComments=9
