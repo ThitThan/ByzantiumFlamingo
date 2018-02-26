@@ -13,7 +13,7 @@ public class Background extends Actor
     
     GreenfootImage bg;
     public void addedToWorld(World w) {
-        bg = new GreenfootImage("dark-bg.jpg");
+        bg = new GreenfootImage("dark-bg-5.jpg");
         if (width == -1)
             width = w.getWidth();
         if (height == -1)

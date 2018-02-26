@@ -10,7 +10,11 @@ import java.util.HashMap;
  */
 public class GameWorld extends World
 {   
+    // GROUND
     static final int GROUND_HEIGHT = 24;
+    
+    // DALEK
+    static final int DALEK_DEFAULT_POS = 48;
     
     double xPos;
     int groundY;
@@ -31,6 +35,13 @@ public class GameWorld extends World
         // GRAVITY
         this.setupGravity();
         
+        // SOUND
+        theme = new GreenfootSound[] { 
+            new GreenfootSound("iAmTheDoctor01.mp3"), 
+            new GreenfootSound("iAmTheDoctor02.mp3") 
+        };
+        //theme[0].playLoop();
+        
         // Add a Flamingo
         Flamingo fla = new Flamingo();
         fla.setCallback(new Flamingo.Callback() {
@@ -50,12 +61,10 @@ public class GameWorld extends World
         });
         addGroundObject(fla, (getWidth()/2) - 24, getHeight() / 2);
         
-        // SOUND
-        theme = new GreenfootSound[] { 
-            new GreenfootSound("iAmTheDoctor01.mp3"), 
-            new GreenfootSound("iAmTheDoctor02.mp3") 
-        };
-        //theme[0].playLoop();
+        // ENEMY (DALEK)
+        Dalek dalek = new Dalek();
+        setPaintOrder(Dalek.class, Grass.class);
+        addGroundObject(dalek, DALEK_DEFAULT_POS, (int) (getHeight() * 0.25));
     }
     
     //
@@ -63,7 +72,7 @@ public class GameWorld extends World
     //
     //int bgScrollAmount = 2;
     static final int OBSTACLE_DISTANCE = 960;
-    static final int SPEED_UP_EVERY = 100000;
+    static final int SPEED_UP_EVERY = 50000;
     double lastObsX = 0;
     double lastSpeedup = 0;
     @Override

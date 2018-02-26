@@ -9,7 +9,7 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 public class Grass extends Actor
 {
     // SCALING
-    public static double scale = 0.15;
+    public static double scale = 0.2;
     public static double width = 640 * scale;
     public static double height = 256 * scale;
     static GreenfootImage image;
@@ -17,7 +17,7 @@ public class Grass extends Actor
     @Override
     public void addedToWorld(World world) {
         if (image == null) {
-            image = new GreenfootImage("grass.png");
+            image = new GreenfootImage("grass-blue-2.png");
             image.scale((int) width, (int) height);
             //System.out.println("GRASS height : " + height + ", getHeight() : " + image.getHeight());
         }
