@@ -11,10 +11,16 @@ import java.util.HashMap;
 public class GameWorld extends World
 {   
     // GROUND
-    static final int GROUND_HEIGHT = 24;
+    static final int GROUND_HEIGHT = 32;
     
     // DALEK
-    static final int DALEK_DEFAULT_POS = 48;
+    static final int DALEK_DEFAULT_POS = -36;
+    static final int DALEK_THREAT_POS = 48;
+    
+    // ACTORS
+    Flamingo fla;
+    Dalek dalek;
+    Ground ground;
     
     double xPos;
     int groundY;
@@ -43,7 +49,7 @@ public class GameWorld extends World
         //theme[0].playLoop();
         
         // Add a Flamingo
-        Flamingo fla = new Flamingo();
+        fla = new Flamingo();
         fla.setCallback(new Flamingo.Callback() {
             public void onJumpStarted(Flamingo f) {
                 if (ignoreGravity.indexOf(f) == -1)
@@ -62,10 +68,19 @@ public class GameWorld extends World
         addGroundObject(fla, (getWidth()/2) - 24, getHeight() / 2);
         
         // ENEMY (DALEK)
-        Dalek dalek = new Dalek();
+        dalek = new Dalek();
         setPaintOrder(Dalek.class, Grass.class);
         addGroundObject(dalek, DALEK_DEFAULT_POS, (int) (getHeight() * 0.25));
+        
+        // GROUND
+        ground = new Ground(GROUND_HEIGHT);
+        addObject(ground, 0, 0);
     }
+    
+    //
+    // DALEK
+    //
+    boolean dalekCatchedUp = false;
     
     //
     // MAIN GAME EVENTS
@@ -75,6 +90,10 @@ public class GameWorld extends World
     static final int SPEED_UP_EVERY = 50000;
     double lastObsX = 0;
     double lastSpeedup = 0;
+    
+    boolean dalekKeyPressed = false;
+    boolean dalekSoundPlayed = false;
+
     @Override
     public void act() {
         applyGravity();
@@ -92,19 +111,47 @@ public class GameWorld extends World
         playTheme();
         
         // ADD OBSTACLES
-        
-        if (xPos - lastObsX >= (OBSTACLE_DISTANCE / 4 * bgVelo)) {
+        if (xPos - lastObsX >= (OBSTACLE_DISTANCE / 4 * sceneVelo)) {
             Grass grass = new Grass();
             addObstacle(grass);
             
             //System.out.println("lastObsX = " + lastObsX);
             lastObsX = xPos;
         }
+        
+        // SPPED UP
         if (xPos - lastSpeedup >= SPEED_UP_EVERY) {
-            bgVelo += 1;
+            sceneVelo += 1;
             lastSpeedup = xPos;
             
-            System.out.println("lastSpeedup = " + lastSpeedup + ", velo = " + bgVelo);
+            System.out.println("lastSpeedup = " + lastSpeedup + ", velo = " + sceneVelo);
+        }
+        
+        // ANIMATE DALEK IF NEEDED
+        if (dalekCatchedUp) {
+            if (!dalekSoundPlayed) {
+                dalek.playSound();
+                dalekSoundPlayed = true;
+            }
+            if (dalek.getX() < DALEK_THREAT_POS)
+                dalek.setLocation(dalek.getX() + 2, dalek.getY());
+        }
+        else {
+            dalekSoundPlayed = false;
+            if (dalek.getX() > DALEK_DEFAULT_POS)
+                dalek.setLocation(dalek.getX() - 2, dalek.getY());
+        }
+        
+        // PRESS 'D' TO TEST DALEK
+        if (Greenfoot.isKeyDown("d")) {
+            if (!dalekKeyPressed) {
+                dalekCatchedUp = !dalekCatchedUp;
+                dalekKeyPressed = true;
+                //System.out.println("d pressed");
+            }
+        }
+        else {
+            dalekKeyPressed = false;
         }
     }
     
@@ -233,10 +280,18 @@ public class GameWorld extends World
         this.obstacles = new ArrayList<>();
     }
     public void addObstacle(Actor actor) {
+        // add to world first
+        addGroundObject(actor, 0, 0);
+        
+        // set location (put on the ground)
         int x = getWidth() + (actor.getImage().getWidth() / 2);
-        int y = getHeight() - GROUND_HEIGHT - (actor.getImage().getHeight() / 2);
+        //int x = getWidth() / 2;
+        int y = getHeight() - GROUND_HEIGHT - (actor.getImage().getHeight()/2);
+        System.out.println(getHeight() + " - " + GROUND_HEIGHT + " - (" + actor.getImage().getHeight() + " / 2) = " + y);
         //int y = getHeight() / 2;
-        addGroundObject(actor, x, y);
+        actor.setLocation(x, y);
+        
+        // add to ArrayList
         obstacles.add(actor);
     }
     public void removeObstacle(Actor actor) {
@@ -260,10 +315,18 @@ public class GameWorld extends World
     // SCROLLING BACKGROUND
     //
     Background[] bg;
-    double bgVelo = 4;
-    int maxBgX = (int)(getWidth() * 2.5);
-    int minBgX = - (getWidth()/2);
+    static final double DEFAULT_SCENE_VELO = 4;
+    static final double BG_VELO = 0.5;
+    
+    double sceneVelo = 4;
+    //double bgVelo = 0.5;
+    
+    double maxBgX = getWidth() * 2.5;
+    double minBgX = - (getWidth()/2);
     int centerY = getHeight()/2;
+    
+    double[] bgX;
+    
     public void setupBackground() {
         bg = new Background[3];
         
@@ -274,7 +337,16 @@ public class GameWorld extends World
         addObject(bg[1], (int)(getWidth() * 1.5), centerY);
         
         bg[2] = new Background();
-        addObject(bg[2], maxBgX, centerY);
+        addObject(bg[2], (int) maxBgX, centerY);
+        
+        // x position in double
+        bgX = new double[bg.length];
+        for (int i = 0; i < bg.length; i++) {
+            bgX[i] = bg[i].getX();
+        }
+        
+        //System.out.println("minBgX = " + minBgX);
+        //System.out.println("maxBgX = " + maxBgX);
     }
     public void scrollBackground(int n) {
         for (int i = 0; i < Math.abs(n); i++)
@@ -282,22 +354,23 @@ public class GameWorld extends World
     }
     public void scrollBackground(boolean forward) {
         for (int i = 0; i < bg.length; i++) {
-            int newX = (int)(bg[i].getX() - (bgVelo * (forward ? 1:-1)));
-            // DISTANCE
-            //System.out.println("xPos = " + xPos);
-            xPos += (bgVelo * (forward ? 1:-1));
+            double newX = bgX[i] - ((BG_VELO / DEFAULT_SCENE_VELO * sceneVelo) * (forward ? 1.0:-1.0));
+            //double newX = bgX[i] - (1 * (forward ? 1:-1));
             
-            //int previous = i-1;
-            //if (previous == -1)
-            //    previous = bg.length - 1;
-                
+            // DISTANCE
+            //System.out.print(newX + " ");
+            xPos += (sceneVelo * (forward ? 1:-1));
+            
+            //System.out.print(" <= " + minBgX + " : " + (newX <= minBgX) + " ");
+            
             if (newX <= minBgX) {
+                //System.out.println("nope it's " + newX + " ");
                 newX = newX + minBgX + maxBgX;
             }
-                //newX = bg[previous].getX() + getWidth();
-            //System.out.println("newX : " + newX);
-            bg[i].setLocation(newX, bg[i].getY());
+            bgX[i] = newX;
+            bg[i].setLocation((int) newX, bg[i].getY());
         }
-        scrollObstacles((int)bgVelo);
+        //System.out.println();
+        scrollObstacles((int)sceneVelo);
     }
 }

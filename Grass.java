@@ -9,7 +9,7 @@ import greenfoot.*;  // (World, Actor, GreenfootImage, Greenfoot and MouseInfo)
 public class Grass extends Actor
 {
     // SCALING
-    public static double scale = 0.2;
+    public static double scale = 0.18;
     public static double width = 640 * scale;
     public static double height = 256 * scale;
     static GreenfootImage image;

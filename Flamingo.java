@@ -42,7 +42,6 @@ public class Flamingo extends Actor
         images = new GreenfootImage[36];
         for (int i = 0; i < 36; i++) {
             images[i] = new GreenfootImage("Flamingo" + (i+1) + ".png");
-             
             images[i].scale((int) width, (int) height);
         }
         setImage( images[0] );
@@ -86,9 +85,6 @@ public class Flamingo extends Actor
         if (isJumping) {
             applyJumping();
         }
-        
-        // CHECK CRASHING
-        
     }   
     
     // JUMPING
@@ -111,7 +107,7 @@ public class Flamingo extends Actor
         v = v - (GRAVITY * t * 0.05);
         t += 0.1;
         
-        if (v < START_SPEED * 2/3)
+        if (v < START_SPEED * 3/5)
             animateWalk(-1);
         //frame = 6;
         
@@ -140,7 +136,7 @@ public class Flamingo extends Actor
         else if (frame < 0)
             this.frame += 36;
         
-        if (frame % 3 == 0)
+        //if (frame % 3 == 0)
             setImage(images[this.frame]);
     }
 }
